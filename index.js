@@ -1,33 +1,87 @@
 var fs = require('fs');
+var readLine = require('readline');
+var HashMap = require('hashmap');
+var readStream = fs.createReadStream('a_example.in');
 
-
-fs.readFile('a_example.in', "utf8", function (err, data) {
-  if (err) throw err;
-
-  var lines = data.split("\n");
-  var params = lines[0].split(" ");
-  var R = params[0];
-  var C = params[1];
-  var F = params[2];
-  var N = params[3];
-  var B = params[4];
-  var T = params[5];
-  console.log(R, C, F, N, B, T);
-  for (var i = 0; i < F; i++) {
-    var ride = lines[i + 1].split(" ");
-    var a = ride[0];
-    var b = ride[1];
-    var x = ride[2];
-    var y = ride[3];
-    var s = ride[4];
-    var f = ride[5];
-    console.log(a, b, x, y, s, f);
-  }
+var lineReader = readLine.createInterface({
+  input: readStream
 });
-fs.writeFile("a_example.out", "test", function (err) {
-  if (err) {
-    return console.log(err);
+
+var lineNumber = 1;
+var numRows;
+var numColumns;
+var numVehicles;
+var numRides;
+var numBonusPts;
+var numSteps;
+var rides = [];
+
+lineReader.on('line', function (line) {
+
+  const lineArray = line.split(" ");
+
+  if (lineNumber === 1) {
+
+    for (var i=0; i < lineArray.length; i++) {
+      switch(i) {
+        case 0:
+          numRows = lineArray[i];
+          break;
+        case 1:
+          numColumns = lineArray[i];
+          break;
+        case 2:
+          numVehicles = lineArray[i];
+          break;
+        case 3:
+          numRides = lineArray[i];
+          break;
+        case 4:
+          numBonusPts = lineArray[i];
+          break;
+        case 5:
+          numSteps = lineArray[i];
+          break;
+        default:
+
+      }
+    }
+  } else {
+
+    const indexToKeyHashMap = new HashMap();
+    indexToKeyHashMap.set(0, 'startPointX');
+    indexToKeyHashMap.set(1, 'startPointY');
+    indexToKeyHashMap.set(2, 'finishPointX');
+    indexToKeyHashMap.set(3, 'finishPointY');
+    indexToKeyHashMap.set(4, 'earliestStart');
+    indexToKeyHashMap.set(5, 'latestFinish');
+
+    const ride = {};
+
+    for (var i=0; i < lineArray.length; i++) {
+      ride[indexToKeyHashMap.get(i)] = lineArray[i];
+    }
+
+    rides.push(ride);
   }
 
-  console.log("The file was saved!");
+  lineNumber++;
+})
+
+lineReader.on('close', function(){
+
+    console.log(" Num Rows: " + numRows);
+    console.log(" Num Columns: " + numColumns);
+    console.log(" Num Vehicles: " + numVehicles);
+    console.log(" Num Rides: " + numRides);
+    console.log(" Num Bonus Points: " + numBonusPts);
+    console.log(" Num Steps: " + numSteps);
+    console.log("About to spit out list of rides...");
+    console.log(rides);
+
+    lineReader.close();
 });
+
+
+
+//calculate steps between distance
